@@ -1,65 +1,63 @@
 # Patient Readmission Prediction
 
-The Patient Readmission Prediction accelerator helps healthcare organizations identify patients at high risk of hospital readmission using a pre-trained machine learning model built on clinical and administrative data.
+This application predicts hospital patient readmission using a machine learning model trained on patient encounter data. It provides both single-patient and batch prediction capabilities.
 
-## Key Features
+## Getting Started
 
-- **Single Patient Prediction** — Enter individual patient details to get an instant readmission risk score with probability percentages.
-- **Batch Prediction** — Connect your own Snowflake patient tables to run predictions across thousands of records at once.
-- **No Data Movement** — All predictions run inside Snowflake. Your patient data never leaves your account.
-- **Pre-Trained Model** — Random Forest classifier trained on 16 clinical features.
+1. Install the application from the Snowflake Marketplace.
+2. Open the application — the Streamlit UI will launch automatically.
+3. For **single predictions**, use the "Single Prediction" tab and fill in patient details.
+4. For **batch predictions**, connect your patient table (and optionally a results table) using the buttons on the "Batch Prediction" tab. The app will prompt you through the standard Snowsight permissions flow.
 
-## How to Use
+## References Required
 
-1. Install the app.
-2. The Streamlit interface opens with two tabs: **Single Prediction** and **Batch Prediction**.
+| Reference | Object Type | Privileges | Purpose |
+|---|---|---|---|
+| Consumer Patient Table | TABLE | SELECT | Source patient data for batch predictions |
+| Consumer Results Table | TABLE | SELECT, INSERT | Destination for prediction results |
 
-### Single Prediction
+When you open the Batch Prediction tab, the app will prompt you to connect each table through the standard Snowsight permissions dialog. Click the **"Connect Patient Table"** and **"Connect Results Table"** buttons to grant access.
 
-Enter patient details manually and click **Predict Readmission** to get a real-time prediction with probability scores.
+## Input Patient Table Schema
 
-### Batch Prediction
+Your patient table **must** contain the following columns with **exact names and accepted values** as shown below. All VARCHAR values are **case-sensitive**.
 
-1. Go to the app **Settings** (gear icon) > **References** tab.
-2. Grant SELECT access on your patient table (**consumer_patient_table** reference).
-3. Optionally grant SELECT + INSERT access on a results table (**consumer_results_table** reference).
-4. Return to the **Batch Prediction** tab, preview your data, and click **Run Batch Predictions**.
-5. Download results as CSV or have them written to your results table.
+| Column | Type | Description | Accepted Values |
+|---|---|---|---|
+| `AGE` | VARCHAR | Age group bracket | `[0-10)`, `[10-20)`, `[20-30)`, `[30-40)`, `[40-50)`, `[50-60)`, `[60-70)`, `[70-80)`, `[80-90)`, `[90-100)` |
+| `A1CTEST` | VARCHAR | HbA1c test result | `none`, `normal`, `high` |
+| `CHANGE` | VARCHAR | Medication changed during encounter | `no`, `yes` |
+| `DIABETES_MED` | VARCHAR | Diabetes medication prescribed | `no`, `yes` |
+| `DIAG_1` | VARCHAR | Primary diagnosis group | `Diag_0` through `Diag_49` (format: `Diag_<number>`) |
+| `DIAG_2` | VARCHAR | Secondary diagnosis group | `Diag_0` through `Diag_39` (format: `Diag_<number>`) |
+| `DIAG_3` | VARCHAR | Tertiary diagnosis group | `Diag_0` through `Diag_29` (format: `Diag_<number>`) |
+| `GLUCOSE_TEST` | VARCHAR | Serum glucose test result | `none`, `normal`, `high` |
+| `MEDICAL_SPECIALTY` | VARCHAR | Admitting physician specialty | `Cardiology`, `InternalMedicine`, `Surgery`, `Emergency`, `Family/GeneralPractice` |
+| `N_LAB_PROCEDURES` | NUMBER | Count of lab procedures performed | Integer >= 0 |
+| `N_PROCEDURES` | NUMBER | Count of medical procedures performed | Integer >= 0 |
+| `N_MEDICATIONS` | NUMBER | Count of medications administered | Integer >= 1 |
+| `N_OUTPATIENT` | NUMBER | Outpatient visits in prior year | Integer >= 0 |
+| `N_INPATIENT` | NUMBER | Inpatient visits in prior year | Integer >= 0 |
+| `N_EMERGENCY` | NUMBER | Emergency visits in prior year | Integer >= 0 |
+| `TIME_IN_HOSPITAL` | NUMBER | Length of hospital stay in days | Integer >= 1 |
 
-## Required Table Schema
+### Example Input Data
 
-Your patient table must contain the following columns:
-
-| Column | Type | Description |
-|--------|------|-------------|
-| AGE | VARCHAR | Age group of the patient (e.g. [50-60)) |
-| A1CTEST | VARCHAR | A1C test result (none, normal, high) |
-| CHANGE | VARCHAR | Whether medication was changed (yes, no) |
-| DIABETES_MED | VARCHAR | Whether patient is on diabetes medication (yes, no) |
-| DIAG_1 | VARCHAR | Primary diagnosis code |
-| DIAG_2 | VARCHAR | Secondary diagnosis code |
-| DIAG_3 | VARCHAR | Additional diagnosis code |
-| GLUCOSE_TEST | VARCHAR | Glucose test result (none, normal, high) |
-| MEDICAL_SPECIALTY | VARCHAR | Admitting medical specialty |
-| N_LAB_PROCEDURES | NUMBER | Number of lab procedures performed |
-| N_PROCEDURES | NUMBER | Number of procedures performed |
-| N_MEDICATIONS | NUMBER | Number of medications administered |
-| N_OUTPATIENT | NUMBER | Number of outpatient visits in prior year |
-| N_INPATIENT | NUMBER | Number of inpatient visits in prior year |
-| N_EMERGENCY | NUMBER | Number of emergency visits in prior year |
-| TIME_IN_HOSPITAL | NUMBER | Length of hospital stay in days |
-
-## Built For
-
-Healthcare providers, hospital systems, health insurers, and clinical analytics teams looking to proactively reduce readmission rates, improve patient outcomes, and optimize resource allocation.
-
-## Requirements
-
-- A Snowflake account with the app installed
-- For batch mode: a patient table matching the schema above
-
-## About
-
-Powered by **Boolean Data Systems**
-
-We leverage Snowflake to plan and design emerging data architectures that facilitate incorporation of high-quality and flexible data. These solutions lower costs and enhance output, designed to transform smoothly as your enterprise, and your data continue to increase over time.
+```sql
+SELECT
+  '[50-60)'          AS AGE,
+  'none'             AS A1CTEST,
+  'yes'              AS CHANGE,
+  'yes'              AS DIABETES_MED,
+  'Diag_14'          AS DIAG_1,
+  'Diag_5'           AS DIAG_2,
+  'Diag_22'          AS DIAG_3,
+  'normal'           AS GLUCOSE_TEST,
+  'InternalMedicine' AS MEDICAL_SPECIALTY,
+  45                 AS N_LAB_PROCEDURES,
+  2                  AS N_PROCEDURES,
+  15                 AS N_MEDICATIONS,
+  1                  AS N_OUTPATIENT,
+  0                  AS N_INPATIENT,
+  0                  AS N_EMERGENCY,
+  5                  AS TIME_IN_HOSPITAL;
