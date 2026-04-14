@@ -61,3 +61,58 @@ SELECT
   0                  AS N_INPATIENT,
   0                  AS N_EMERGENCY,
   5                  AS TIME_IN_HOSPITAL;
+```
+
+## Output Results Table Schema
+
+Your results table **must** be created with the following schema before binding it to the app. The app writes prediction results using `INSERT` — it will not create or alter the table.
+
+```sql
+CREATE TABLE my_results_table (
+    AGE                    VARCHAR,
+    A1CTEST                VARCHAR,
+    CHANGE                 VARCHAR,
+    DIABETES_MED           VARCHAR,
+    DIAG_1                 VARCHAR,
+    DIAG_2                 VARCHAR,
+    DIAG_3                 VARCHAR,
+    GLUCOSE_TEST           VARCHAR,
+    MEDICAL_SPECIALTY      VARCHAR,
+    N_LAB_PROCEDURES       NUMBER,
+    N_PROCEDURES           NUMBER,
+    N_MEDICATIONS          NUMBER,
+    N_OUTPATIENT           NUMBER,
+    N_INPATIENT            NUMBER,
+    N_EMERGENCY            NUMBER,
+    TIME_IN_HOSPITAL       NUMBER,
+    PREDICTION             NUMBER,
+    PREDICTION_LABEL       VARCHAR,
+    READMIT_PROBABILITY    FLOAT,
+    NO_READMIT_PROBABILITY FLOAT
+);
+```
+
+| Column | Type | Description |
+|---|---|---|
+| `AGE` | VARCHAR | Age group (echoed from input) |
+| `A1CTEST` | VARCHAR | A1C test result (echoed from input) |
+| `CHANGE` | VARCHAR | Medication change flag (echoed from input) |
+| `DIABETES_MED` | VARCHAR | Diabetes medication flag (echoed from input) |
+| `DIAG_1` | VARCHAR | Primary diagnosis group (echoed from input) |
+| `DIAG_2` | VARCHAR | Secondary diagnosis group (echoed from input) |
+| `DIAG_3` | VARCHAR | Tertiary diagnosis group (echoed from input) |
+| `GLUCOSE_TEST` | VARCHAR | Glucose test result (echoed from input) |
+| `MEDICAL_SPECIALTY` | VARCHAR | Physician specialty (echoed from input) |
+| `N_LAB_PROCEDURES` | NUMBER | Lab procedure count (echoed from input) |
+| `N_PROCEDURES` | NUMBER | Procedure count (echoed from input) |
+| `N_MEDICATIONS` | NUMBER | Medication count (echoed from input) |
+| `N_OUTPATIENT` | NUMBER | Outpatient visits (echoed from input) |
+| `N_INPATIENT` | NUMBER | Inpatient visits (echoed from input) |
+| `N_EMERGENCY` | NUMBER | Emergency visits (echoed from input) |
+| `TIME_IN_HOSPITAL` | NUMBER | Hospital stay in days (echoed from input) |
+| `PREDICTION` | NUMBER | Model prediction: `1` = Readmission, `0` = No Readmission |
+| `PREDICTION_LABEL` | VARCHAR | Human-readable label: `Readmission` or `No Readmission` |
+| `READMIT_PROBABILITY` | FLOAT | Probability of readmission (0.0 to 1.0) |
+| `NO_READMIT_PROBABILITY` | FLOAT | Probability of no readmission (0.0 to 1.0) |
+
+> **Note:** All 16 input columns are echoed into the results table alongside the 4 prediction columns, so you can trace each prediction back to its input record.
